@@ -27,6 +27,12 @@ class Game:
             card = self.deck.draw()
             self.player_cards.append(card)
 
+    def player_hit(self):
+        self.player_cards.append(self.deck.draw())
+
+    def get_state(self):
+        return sum(self.player_cards)
+
     def evaluate_winner(self):
         sum_house = sum(self.house_cards)
         sum_player = sum(self.player_cards)
@@ -55,5 +61,6 @@ class Game:
         self.new_game()
         self.execute_house()
         self.execute_player(player_threshold)
+        print(self)
         return self.evaluate_winner()
 
