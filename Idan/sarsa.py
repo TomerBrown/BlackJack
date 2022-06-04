@@ -4,7 +4,7 @@ import numpy as np
 from tqdm import tqdm
 
 ALPHA = 0.5
-
+THETA = 0.5
 
 class Blackjack(object):
     def __init__(self):
@@ -68,17 +68,36 @@ class Blackjack(object):
         else:
             return -1
 
+    def epsilon_greedy(self, Q, s, epsilon=0.1):
+        if Q[(s, 0)] < Q[(s, 1)]:
+            best_action = 1
+            worse_action = 0
+
+        if Q[(s, 0)] == Q[(s, 1)]:
+            best_action = random.randint(0, 1)
+            worse_action = 1 - best_action
+
+        else:
+            best_action = 0
+            worse_action = 1
+
+        if random.random() < epsilon:
+            return worse_action
+
+        return best_action
+
     def agent_game(self, T: int):
         num_wins = 0
         alpha_t = 0.1
         Q = np.zeros((21, 2))
         pbar = tqdm(range(1, T+1))
         for t in pbar:
+            eps_t = 1/((t+1)**THETA)
             self.new_deck()
             player_hand = self.deal()
             dealer_hand = self.deal()
             s_t = self.total(player_hand)
-            a_t = np.argmax(Q[s_t - 1])
+            a_t = self.epsilon_greedy(Q,s_t-1,eps_t)
             if a_t == 1:
                 self.hit(player_hand)
             while self.total(dealer_hand) <= 15:
@@ -130,12 +149,12 @@ def p_win_state(V):
 
 if __name__ == "__main__":
     blackjack = Blackjack()
-    Q = blackjack.agent_game(100000)
+    Q = blackjack.agent_game(500000)
     V = np.max(Q, axis=1)
     pi = np.argmax(Q, axis=1)
     P = blackjack.p_states()
     print('Policy:')
     print(pi)
-    print(np.sum(V[3:] * P))
+    print(np.sum( P))
     print(p_win(np.sum(V[3:] * P)))
     print(p_win_state(V[3:]))
