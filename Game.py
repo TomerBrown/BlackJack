@@ -31,9 +31,18 @@ class Game:
         self.player_cards.append(self.deck.draw())
 
     def get_state(self):
-        return sum(self.player_cards)
+        return min(sum(self.player_cards), 22)
 
     def evaluate_winner(self):
+        """
+            Evaluates who won the game (+1 gambler, 0 Tie , -1 House).
+            Assumptions about the rules:
+                * If both house and gambler are over 21 it is a tie
+                * If both have the exact same number, it's a tie
+                * If only one of them is over 21 the other wins
+                * If both are at most 21, the higher between them wins.
+
+        """
         sum_house = sum(self.house_cards)
         sum_player = sum(self.player_cards)
 
@@ -43,7 +52,7 @@ class Game:
 
         # If only player is over 21: it is a lose(-1)
         if sum_house<= 21 and sum_player > 21:
-            return -1
+            return 0
 
         # If only house is over: 21 it is a win(+1)
         if sum_house> 21 and sum_player <= 21:
